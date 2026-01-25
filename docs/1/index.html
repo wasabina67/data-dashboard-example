@@ -101,7 +101,27 @@
             width: 40px;
             background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
             border-radius: 4px 4px 0 0;
-            transition: height 0.3s ease;
+        }
+        .chart-legend {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        @media (max-width: 600px) {
+            .chart-placeholder {
+                padding: 12px;
+            }
+            .bar {
+                width: 24px;
+            }
+            .chart-legend {
+                font-size: 10px;
+            }
         }
         .data-table {
             width: 100%;
@@ -147,12 +167,12 @@
         <h1>Data Dashboard</h1>
         <nav>
             <a href="../index.html">Home</a>
-            <a href="#reports" aria-label="Reports section (coming soon)">Reports</a>
-            <a href="#settings" aria-label="Settings section (coming soon)">Settings</a>
+            <a href="#" aria-label="Reports section (coming soon)">Reports</a>
+            <a href="#" aria-label="Settings section (coming soon)">Settings</a>
         </nav>
     </header>
 
-    <div class="container">
+    <main class="container">
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Users</h3>
@@ -178,25 +198,40 @@
 
         <div class="chart-section">
             <h2>Monthly Overview</h2>
-            <div class="chart-placeholder" role="img" aria-label="Bar chart showing monthly revenue data from January to December">
-                <div class="bar" style="height: 60%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 80%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 45%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 90%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 70%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 85%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 55%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 95%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 75%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 65%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 88%;" role="presentation" aria-hidden="true"></div>
-                <div class="bar" style="height: 72%;" role="presentation" aria-hidden="true"></div>
+            <div class="chart-placeholder" role="img" aria-label="Bar chart showing monthly data from January to December">
+                <div class="bar" style="height: 60%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 80%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 45%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 90%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 70%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 85%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 55%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 95%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 75%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 65%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 88%;" aria-hidden="true"></div>
+                <div class="bar" style="height: 72%;" aria-hidden="true"></div>
+            </div>
+            <div class="chart-legend" aria-hidden="true">
+                <span>Jan</span>
+                <span>Feb</span>
+                <span>Mar</span>
+                <span>Apr</span>
+                <span>May</span>
+                <span>Jun</span>
+                <span>Jul</span>
+                <span>Aug</span>
+                <span>Sep</span>
+                <span>Oct</span>
+                <span>Nov</span>
+                <span>Dec</span>
             </div>
         </div>
 
         <div class="chart-section">
             <h2>Recent Activity</h2>
-            <table class="data-table" aria-label="Recent user activity">
+            <div class="table-container">
+                <table class="data-table" aria-label="Recent user activity">
                 <thead>
                     <tr>
                         <th>User</th>
@@ -238,7 +273,8 @@
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
-    </div>
+    </main>
 </body>
 </html>
