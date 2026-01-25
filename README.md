@@ -1,5 +1,5 @@
-# express-static-server-template
-Express static server template
+# data-dashboard-example
+Data Dashboard example
 
 ## Install
 ```bash
