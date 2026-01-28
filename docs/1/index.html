@@ -36,6 +36,18 @@
     }
     .header nav a:hover {
       opacity: 1;
+      text-decoration: underline;
+    }
+    .header nav .nav-disabled {
+      color: white;
+      margin-left: 20px;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    @media (max-width: 600px) {
+      .header {
+        padding: 20px;
+      }
     }
     .container {
       max-width: 1200px;
@@ -154,7 +166,7 @@
     }
     .status.pending {
       background: #fef3c7;
-      color: #92400e;
+      color: #78350f;
     }
     .status.inactive {
       background: #fee2e2;
@@ -166,9 +178,8 @@
   <header class="header">
     <h1>Data Dashboard</h1>
     <nav>
-      <a href="../index.html">Home</a>
-      <a href="#" aria-label="Reports section (coming soon)">Reports</a>
-      <a href="#" aria-label="Settings section (coming soon)">Settings</a>
+      <span class="nav-disabled" aria-label="Reports section (coming soon)">Reports</span>
+      <span class="nav-disabled" aria-label="Settings section (coming soon)">Settings</span>
     </nav>
   </header>
 
@@ -232,47 +243,47 @@
       <h2>Recent Activity</h2>
       <div class="table-container">
         <table class="data-table" aria-label="Recent user activity">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Action</th>
-            <th>Date</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>John Smith</td>
-            <td>Purchased Premium Plan</td>
-            <td>Jan 25, 2026</td>
-            <td><span class="status active">Active</span></td>
-          </tr>
-          <tr>
-            <td>Emily Johnson</td>
-            <td>Updated Profile</td>
-            <td>Jan 24, 2026</td>
-            <td><span class="status active">Active</span></td>
-          </tr>
-          <tr>
-            <td>Michael Brown</td>
-            <td>Submitted Support Ticket</td>
-            <td>Jan 24, 2026</td>
-            <td><span class="status pending">Pending</span></td>
-          </tr>
-          <tr>
-            <td>Sarah Davis</td>
-            <td>Cancelled Subscription</td>
-            <td>Jan 23, 2026</td>
-            <td><span class="status inactive">Inactive</span></td>
-          </tr>
-          <tr>
-            <td>David Wilson</td>
-            <td>New Registration</td>
-            <td>Jan 23, 2026</td>
-            <td><span class="status active">Active</span></td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col">Action</th>
+              <th scope="col">Date</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>John Smith</td>
+              <td>Purchased Premium Plan</td>
+              <td>Jan 25, 2026</td>
+              <td><span class="status active">Active</span></td>
+            </tr>
+            <tr>
+              <td>Emily Johnson</td>
+              <td>Updated Profile</td>
+              <td>Jan 24, 2026</td>
+              <td><span class="status active">Active</span></td>
+            </tr>
+            <tr>
+              <td>Michael Brown</td>
+              <td>Submitted Support Ticket</td>
+              <td>Jan 24, 2026</td>
+              <td><span class="status pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td>Sarah Davis</td>
+              <td>Cancelled Subscription</td>
+              <td>Jan 23, 2026</td>
+              <td><span class="status inactive">Inactive</span></td>
+            </tr>
+            <tr>
+              <td>David Wilson</td>
+              <td>New Registration</td>
+              <td>Jan 23, 2026</td>
+              <td><span class="status active">Active</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </main>
