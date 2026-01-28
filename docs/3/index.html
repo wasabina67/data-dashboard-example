@@ -274,6 +274,9 @@
       text-align: right;
       font-family: 'SF Mono', 'Consolas', monospace;
     }
+    .data-table .emphasized {
+      font-weight: 600;
+    }
     .status {
       padding: 4px 12px;
       border-radius: 20px;
@@ -354,6 +357,35 @@
     }
     .inventory-box .count.danger {
       color: #ef4444;
+    }
+    .price-tier-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      width: 100%;
+      height: 100%;
+    }
+    .price-tier-item {
+      text-align: center;
+    }
+    .price-tier-item .bar-low {
+      background: linear-gradient(180deg, #a8c5d8 0%, #7ba3bc 100%);
+    }
+    .price-tier-item .bar-mid {
+      background: linear-gradient(180deg, #4a7c9b 0%, #2d5a87 100%);
+    }
+    .price-tier-item .bar-high {
+      background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%);
+    }
+    .price-tier-label {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+    .price-tier-percent {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 4px;
     }
     .channel-comparison {
       display: flex;
@@ -473,14 +505,15 @@
     <!-- 2. 売上・利益推移 -->
     <div class="chart-section">
       <div class="chart-header">
-        <h2>売上・利益推移</h2>
-        <div class="toggle-buttons">
-          <button class="toggle-btn active">月次</button>
-          <button class="toggle-btn">日次</button>
+        <h2>売上・利益推移（過去12ヶ月）</h2>
+        <div class="toggle-buttons" role="group" aria-label="表示期間の切り替え">
+          <button class="toggle-btn active" aria-pressed="true" disabled>月次</button>
+          <button class="toggle-btn" aria-pressed="false" disabled title="デモ版では利用できません">日次</button>
         </div>
       </div>
-      <div class="line-chart" role="img" aria-label="売上高と粗利益の月次推移グラフ">
-        <svg viewBox="0 0 800 200" preserveAspectRatio="xMidYMid meet">
+      <div class="line-chart" role="img" aria-label="売上高と粗利益の過去12ヶ月推移グラフ（2025年2月〜2026年1月）">
+        <svg viewBox="0 0 800 200" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title-sales">
+          <title id="chart-title-sales">売上高と粗利益の月次推移グラフ（2025年2月〜2026年1月）</title>
           <!-- Grid lines -->
           <line x1="50" y1="20" x2="750" y2="20" stroke="#e5e7eb" stroke-width="1"/>
           <line x1="50" y1="60" x2="750" y2="60" stroke="#e5e7eb" stroke-width="1"/>
@@ -558,7 +591,8 @@
       <div class="chart-section" style="margin-bottom: 0;">
         <h2>カテゴリ別売上</h2>
         <div class="pie-chart-container">
-          <svg width="180" height="180" viewBox="0 0 180 180" class="pie-chart" role="img" aria-label="カテゴリ別売上の円グラフ">
+          <svg width="180" height="180" viewBox="0 0 180 180" class="pie-chart" role="img" aria-labelledby="chart-title-category">
+            <title id="chart-title-category">カテゴリ別売上の円グラフ：テレビ25%、エアコン20%、冷蔵庫17.5%、洗濯機20%、小型家電17.5%</title>
             <!-- Pie segments -->
             <circle cx="90" cy="90" r="70" fill="transparent" stroke="#1e3a5f" stroke-width="40" stroke-dasharray="110 330" stroke-dashoffset="0"/>
             <circle cx="90" cy="90" r="70" fill="transparent" stroke="#2d5a87" stroke-width="40" stroke-dasharray="88 352" stroke-dashoffset="-110"/>
@@ -630,21 +664,21 @@
     <div class="chart-section">
       <h2>単価帯別販売構成</h2>
       <div class="chart-placeholder" role="img" aria-label="単価帯別販売構成の棒グラフ">
-        <div style="display: flex; align-items: flex-end; justify-content: space-around; width: 100%; height: 100%;">
-          <div style="text-align: center;">
-            <div class="bar" style="height: 35%; background: linear-gradient(180deg, #a8c5d8 0%, #7ba3bc 100%);"></div>
-            <div style="margin-top: 8px; font-size: 12px; color: #666;">低価格帯<br><small>～3万円</small></div>
-            <div style="font-size: 14px; font-weight: 600; margin-top: 4px;">35%</div>
+        <div class="price-tier-chart">
+          <div class="price-tier-item">
+            <div class="bar bar-low" style="height: 35%;"></div>
+            <div class="price-tier-label">低価格帯<br><small>～3万円</small></div>
+            <div class="price-tier-percent">35%</div>
           </div>
-          <div style="text-align: center;">
-            <div class="bar" style="height: 45%; background: linear-gradient(180deg, #4a7c9b 0%, #2d5a87 100%);"></div>
-            <div style="margin-top: 8px; font-size: 12px; color: #666;">中価格帯<br><small>3～10万円</small></div>
-            <div style="font-size: 14px; font-weight: 600; margin-top: 4px;">45%</div>
+          <div class="price-tier-item">
+            <div class="bar bar-mid" style="height: 45%;"></div>
+            <div class="price-tier-label">中価格帯<br><small>3～10万円</small></div>
+            <div class="price-tier-percent">45%</div>
           </div>
-          <div style="text-align: center;">
-            <div class="bar" style="height: 20%; background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%);"></div>
-            <div style="margin-top: 8px; font-size: 12px; color: #666;">高価格帯<br><small>10万円～</small></div>
-            <div style="font-size: 14px; font-weight: 600; margin-top: 4px;">20%</div>
+          <div class="price-tier-item">
+            <div class="bar bar-high" style="height: 20%;"></div>
+            <div class="price-tier-label">高価格帯<br><small>10万円～</small></div>
+            <div class="price-tier-percent">20%</div>
           </div>
         </div>
       </div>
@@ -919,10 +953,10 @@
               <td class="number">3,100万円</td>
             </tr>
             <tr>
-              <td style="font-weight: 600;">ECサイト</td>
-              <td class="number" style="font-weight: 600;">2.55億円</td>
+              <td class="emphasized">ECサイト</td>
+              <td class="number emphasized">2.55億円</td>
               <td class="number change positive">↑ 22.4%</td>
-              <td class="number" style="font-weight: 600;">6,120万円</td>
+              <td class="number emphasized">6,120万円</td>
               <td class="number">24.0%</td>
               <td class="number">8,200万円</td>
             </tr>
@@ -1017,7 +1051,7 @@
               <td class="number">1.3%</td>
             </tr>
             <tr>
-              <td style="font-weight: 600;">ECサイト</td>
+              <td class="emphasized">ECサイト</td>
               <td class="number">185,200 PV</td>
               <td class="number">52,100円</td>
               <td class="number">2.8% (CVR)</td>
