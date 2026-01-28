@@ -1,1 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家電販売ダッシュボード</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .header nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      opacity: 0.9;
+    }
+    .header nav a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .header nav .nav-disabled {
+      color: white;
+      margin-left: 20px;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .header .period-info {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    @media (max-width: 600px) {
+      .header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #1e3a5f;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    .stat-card h3 {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+    }
+    .stat-card .unit {
+      font-size: 14px;
+      color: #666;
+      margin-left: 4px;
+    }
+    .stat-card .change {
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .stat-card .change.positive {
+      color: #10b981;
+    }
+    .stat-card .change.negative {
+      color: #ef4444;
+    }
+    .chart-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 30px;
+    }
+    .chart-section h2 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .chart-header h2 {
+      margin-bottom: 0;
+    }
+    .toggle-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .toggle-btn {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .toggle-btn.active {
+      background: #1e3a5f;
+      color: white;
+      border-color: #1e3a5f;
+    }
+    .chart-placeholder {
+      height: 250px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      padding: 20px;
+      position: relative;
+    }
+    .line-chart {
+      height: 250px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 8px;
+      position: relative;
+      padding: 20px;
+    }
+    .line-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+    .bar {
+      width: 40px;
+      background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+    }
+    .bar-label {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #666;
+      white-space: nowrap;
+    }
+    .chart-legend {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+    .legend-inline {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+    .grid-2col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    @media (max-width: 900px) {
+      .grid-2col {
+        grid-template-columns: 1fr;
+      }
+    }
+    .pie-chart-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+    }
+    .pie-chart {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      position: relative;
+    }
+    .pie-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pie-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .pie-legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .data-table th,
+    .data-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .data-table th {
+      font-weight: 600;
+      color: #666;
+      font-size: 13px;
+      background: #f8fafc;
+    }
+    .data-table tr:hover {
+      background-color: #f9fafb;
+    }
+    .data-table td.number {
+      text-align: right;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+    .data-table .emphasized {
+      font-weight: 600;
+    }
+    .status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status.good {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .status.warning {
+      background: #fef3c7;
+      color: #78350f;
+    }
+    .status.danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .bar-horizontal {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .bar-horizontal .label {
+      width: 80px;
+      font-size: 13px;
+      text-align: right;
+    }
+    .bar-horizontal .bar-bg {
+      flex: 1;
+      height: 24px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-horizontal .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1e3a5f 0%, #2d5a87 100%);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+    }
+    .bar-horizontal .bar-fill span {
+      font-size: 11px;
+      color: white;
+      font-weight: 600;
+    }
+    .inventory-distribution {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      padding: 20px;
+    }
+    .inventory-box {
+      text-align: center;
+      padding: 16px 24px;
+      background: #f8fafc;
+      border-radius: 8px;
+      min-width: 120px;
+    }
+    .inventory-box .days {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .inventory-box .count {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .inventory-box .count.good {
+      color: #10b981;
+    }
+    .inventory-box .count.warning {
+      color: #f59e0b;
+    }
+    .inventory-box .count.danger {
+      color: #ef4444;
+    }
+    .price-tier-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      width: 100%;
+      height: 100%;
+    }
+    .price-tier-item {
+      text-align: center;
+    }
+    .price-tier-item .bar-low {
+      background: linear-gradient(180deg, #a8c5d8 0%, #7ba3bc 100%);
+    }
+    .price-tier-item .bar-mid {
+      background: linear-gradient(180deg, #4a7c9b 0%, #2d5a87 100%);
+    }
+    .price-tier-item .bar-high {
+      background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%);
+    }
+    .price-tier-label {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+    .price-tier-percent {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .channel-comparison {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      padding: 20px;
+    }
+    .channel-box {
+      text-align: center;
+      padding: 20px 30px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .channel-box .channel-name {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .channel-box .channel-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e3a5f;
+    }
+    .channel-box .channel-percent {
+      font-size: 18px;
+      color: #2d5a87;
+      margin-top: 4px;
+    }
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .mini-stat {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .mini-stat .label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .mini-stat .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+    }
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .stat-card .value {
+        font-size: 22px;
+      }
+      .bar {
+        width: 24px;
+      }
+      .pie-chart-container {
+        flex-direction: column;
+      }
+      .channel-comparison {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>家電販売ダッシュボード</h1>
+    <span class="period-info">2026年1月度 （更新日: 2026/01/28）</span>
+    <nav>
+      <span class="nav-disabled" aria-label="レポート機能（準備中）">レポート</span>
+      <span class="nav-disabled" aria-label="設定機能（準備中）">設定</span>
+    </nav>
+  </header>
 
+  <main class="container">
+    <!-- 1. 全体KPI -->
+    <h2 class="section-title">全体KPI</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>今月の売上高</h3>
+        <div class="value">8.5<span class="unit">億円</span></div>
+        <div class="change positive">↑ 12.3% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>今月の粗利益</h3>
+        <div class="value">2.1<span class="unit">億円</span></div>
+        <div class="change positive">↑ 8.7% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>粗利率</h3>
+        <div class="value">24.7<span class="unit">%</span></div>
+        <div class="change negative">↓ 0.8pt 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>販売台数</h3>
+        <div class="value">15,842<span class="unit">台</span></div>
+        <div class="change positive">↑ 5.2% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>在庫金額</h3>
+        <div class="value">3.2<span class="unit">億円</span></div>
+        <div class="change negative">↑ 15.4% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>在庫回転日数</h3>
+        <div class="value">38<span class="unit">日</span></div>
+        <div class="change negative">↑ 3日 前月比</div>
+      </div>
+    </div>
+
+    <!-- 2. 売上・利益推移 -->
+    <div class="chart-section">
+      <div class="chart-header">
+        <h2>売上・利益推移（過去12ヶ月）</h2>
+        <div class="toggle-buttons" role="group" aria-label="表示期間の切り替え">
+          <button class="toggle-btn active" aria-pressed="true" disabled>月次</button>
+          <button class="toggle-btn" aria-pressed="false" disabled title="デモ版では利用できません">日次</button>
+        </div>
+      </div>
+      <div class="line-chart">
+        <svg viewBox="0 0 800 200" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title-sales">
+          <title id="chart-title-sales">売上高と粗利益の月次推移グラフ（2025年2月〜2026年1月）</title>
+          <!-- Grid lines -->
+          <line x1="50" y1="20" x2="750" y2="20" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="60" x2="750" y2="60" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="100" x2="750" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="140" x2="750" y2="140" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="180" x2="750" y2="180" stroke="#e5e7eb" stroke-width="1"/>
+          <!-- Y-axis labels -->
+          <text x="40" y="24" font-size="10" fill="#666" text-anchor="end">10億</text>
+          <text x="40" y="64" font-size="10" fill="#666" text-anchor="end">7.5億</text>
+          <text x="40" y="104" font-size="10" fill="#666" text-anchor="end">5億</text>
+          <text x="40" y="144" font-size="10" fill="#666" text-anchor="end">2.5億</text>
+          <text x="40" y="184" font-size="10" fill="#666" text-anchor="end">0</text>
+          <!-- 売上高 (blue line) -->
+          <polyline fill="none" stroke="#1e3a5f" stroke-width="3"
+            points="100,100 158,110 216,95 274,85 332,90 390,75 448,80 506,70 564,65 622,55 680,50 738,45"/>
+          <!-- 粗利益 (green line) -->
+          <polyline fill="none" stroke="#10b981" stroke-width="3"
+            points="100,150 158,155 216,148 274,145 332,148 390,140 448,142 506,138 564,135 622,130 680,128 738,125"/>
+          <!-- Data points 売上高 -->
+          <circle cx="100" cy="100" r="4" fill="#1e3a5f"/>
+          <circle cx="158" cy="110" r="4" fill="#1e3a5f"/>
+          <circle cx="216" cy="95" r="4" fill="#1e3a5f"/>
+          <circle cx="274" cy="85" r="4" fill="#1e3a5f"/>
+          <circle cx="332" cy="90" r="4" fill="#1e3a5f"/>
+          <circle cx="390" cy="75" r="4" fill="#1e3a5f"/>
+          <circle cx="448" cy="80" r="4" fill="#1e3a5f"/>
+          <circle cx="506" cy="70" r="4" fill="#1e3a5f"/>
+          <circle cx="564" cy="65" r="4" fill="#1e3a5f"/>
+          <circle cx="622" cy="55" r="4" fill="#1e3a5f"/>
+          <circle cx="680" cy="50" r="4" fill="#1e3a5f"/>
+          <circle cx="738" cy="45" r="4" fill="#1e3a5f"/>
+          <!-- Data points 粗利益 -->
+          <circle cx="100" cy="150" r="4" fill="#10b981"/>
+          <circle cx="158" cy="155" r="4" fill="#10b981"/>
+          <circle cx="216" cy="148" r="4" fill="#10b981"/>
+          <circle cx="274" cy="145" r="4" fill="#10b981"/>
+          <circle cx="332" cy="148" r="4" fill="#10b981"/>
+          <circle cx="390" cy="140" r="4" fill="#10b981"/>
+          <circle cx="448" cy="142" r="4" fill="#10b981"/>
+          <circle cx="506" cy="138" r="4" fill="#10b981"/>
+          <circle cx="564" cy="135" r="4" fill="#10b981"/>
+          <circle cx="622" cy="130" r="4" fill="#10b981"/>
+          <circle cx="680" cy="128" r="4" fill="#10b981"/>
+          <circle cx="738" cy="125" r="4" fill="#10b981"/>
+          <!-- X-axis labels -->
+          <text x="100" y="198" font-size="10" fill="#666" text-anchor="middle">2月</text>
+          <text x="158" y="198" font-size="10" fill="#666" text-anchor="middle">3月</text>
+          <text x="216" y="198" font-size="10" fill="#666" text-anchor="middle">4月</text>
+          <text x="274" y="198" font-size="10" fill="#666" text-anchor="middle">5月</text>
+          <text x="332" y="198" font-size="10" fill="#666" text-anchor="middle">6月</text>
+          <text x="390" y="198" font-size="10" fill="#666" text-anchor="middle">7月</text>
+          <text x="448" y="198" font-size="10" fill="#666" text-anchor="middle">8月</text>
+          <text x="506" y="198" font-size="10" fill="#666" text-anchor="middle">9月</text>
+          <text x="564" y="198" font-size="10" fill="#666" text-anchor="middle">10月</text>
+          <text x="622" y="198" font-size="10" fill="#666" text-anchor="middle">11月</text>
+          <text x="680" y="198" font-size="10" fill="#666" text-anchor="middle">12月</text>
+          <text x="738" y="198" font-size="10" fill="#666" text-anchor="middle">1月</text>
+        </svg>
+      </div>
+      <div class="legend-inline">
+        <div class="legend-item">
+          <div class="legend-color" style="background: #1e3a5f;"></div>
+          <span>売上高</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #10b981;"></div>
+          <span>粗利益</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 商品・カテゴリ別分析 -->
+    <h2 class="section-title">商品・カテゴリ別分析</h2>
+    <div class="grid-2col">
+      <div class="chart-section" style="margin-bottom: 0;">
+        <h2>カテゴリ別売上</h2>
+        <div class="pie-chart-container">
+          <svg width="180" height="180" viewBox="0 0 180 180" class="pie-chart" role="img" aria-labelledby="chart-title-category">
+            <title id="chart-title-category">カテゴリ別売上の円グラフ：テレビ25%、エアコン20%、冷蔵庫17.5%、洗濯機20%、小型家電17.5%</title>
+            <!-- Pie segments -->
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#1e3a5f" stroke-width="40" stroke-dasharray="110 330" stroke-dashoffset="0"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#2d5a87" stroke-width="40" stroke-dasharray="88 352" stroke-dashoffset="-110"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#4a7c9b" stroke-width="40" stroke-dasharray="77 363" stroke-dashoffset="-198"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#7ba3bc" stroke-width="40" stroke-dasharray="88 352" stroke-dashoffset="-275"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#a8c5d8" stroke-width="40" stroke-dasharray="77 363" stroke-dashoffset="-363"/>
+          </svg>
+          <div class="pie-legend">
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #1e3a5f;"></div>
+              <span>テレビ 25%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #2d5a87;"></div>
+              <span>エアコン 20%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #4a7c9b;"></div>
+              <span>冷蔵庫 17.5%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #7ba3bc;"></div>
+              <span>洗濯機 20%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #a8c5d8;"></div>
+              <span>小型家電 17.5%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-section" style="margin-bottom: 0;">
+        <h2>メーカー別売上（上位5社）</h2>
+        <div style="padding: 10px 0;">
+          <div class="bar-horizontal">
+            <div class="label">パナソニック</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 85%;"><span>2.1億円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">ソニー</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 72%;"><span>1.8億円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">シャープ</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 60%;"><span>1.5億円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">日立</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 52%;"><span>1.3億円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">東芝</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 44%;"><span>1.1億円</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>単価帯別販売構成</h2>
+      <div class="chart-placeholder" role="img" aria-label="単価帯別販売構成の棒グラフ">
+        <div class="price-tier-chart">
+          <div class="price-tier-item">
+            <div class="bar bar-low" style="height: 35%;"></div>
+            <div class="price-tier-label">低価格帯<br><small>～3万円</small></div>
+            <div class="price-tier-percent">35%</div>
+          </div>
+          <div class="price-tier-item">
+            <div class="bar bar-mid" style="height: 45%;"></div>
+            <div class="price-tier-label">中価格帯<br><small>3～10万円</small></div>
+            <div class="price-tier-percent">45%</div>
+          </div>
+          <div class="price-tier-item">
+            <div class="bar bar-high" style="height: 20%;"></div>
+            <div class="price-tier-label">高価格帯<br><small>10万円～</small></div>
+            <div class="price-tier-percent">20%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>カテゴリ別売上詳細</h2>
+      <div class="table-container">
+        <table class="data-table" aria-label="カテゴリ別売上の詳細表">
+          <thead>
+            <tr>
+              <th scope="col">カテゴリ</th>
+              <th scope="col">売上高</th>
+              <th scope="col">前月比</th>
+              <th scope="col">粗利益</th>
+              <th scope="col">粗利率</th>
+              <th scope="col">販売台数</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>テレビ</td>
+              <td class="number">2.1億円</td>
+              <td class="number change positive">↑ 15.2%</td>
+              <td class="number">5,250万円</td>
+              <td class="number">25.0%</td>
+              <td class="number">2,840台</td>
+            </tr>
+            <tr>
+              <td>エアコン</td>
+              <td class="number">1.7億円</td>
+              <td class="number change positive">↑ 8.5%</td>
+              <td class="number">4,420万円</td>
+              <td class="number">26.0%</td>
+              <td class="number">1,520台</td>
+            </tr>
+            <tr>
+              <td>冷蔵庫</td>
+              <td class="number">1.5億円</td>
+              <td class="number change negative">↓ 2.3%</td>
+              <td class="number">3,600万円</td>
+              <td class="number">24.0%</td>
+              <td class="number">1,180台</td>
+            </tr>
+            <tr>
+              <td>洗濯機</td>
+              <td class="number">1.7億円</td>
+              <td class="number change positive">↑ 5.8%</td>
+              <td class="number">3,910万円</td>
+              <td class="number">23.0%</td>
+              <td class="number">2,450台</td>
+            </tr>
+            <tr>
+              <td>小型家電</td>
+              <td class="number">1.5億円</td>
+              <td class="number change positive">↑ 22.4%</td>
+              <td class="number">3,750万円</td>
+              <td class="number">25.0%</td>
+              <td class="number">7,852台</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. 在庫状況 -->
+    <h2 class="section-title">在庫状況</h2>
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+      <div class="stat-card">
+        <h3>総在庫数量</h3>
+        <div class="value">8,542<span class="unit">点</span></div>
+      </div>
+      <div class="stat-card">
+        <h3>総在庫金額</h3>
+        <div class="value">3.2<span class="unit">億円</span></div>
+      </div>
+      <div class="stat-card">
+        <h3>在庫回転率</h3>
+        <div class="value">2.7<span class="unit">回/月</span></div>
+      </div>
+    </div>
+
+    <div class="grid-2col">
+      <div class="chart-section" style="margin-bottom: 0;">
+        <h2>在庫日数別分布</h2>
+        <div class="inventory-distribution">
+          <div class="inventory-box">
+            <div class="days">30日未満</div>
+            <div class="count good">4,521点</div>
+            <div style="font-size: 12px; color: #666;">53%</div>
+          </div>
+          <div class="inventory-box">
+            <div class="days">30〜60日</div>
+            <div class="count warning">2,562点</div>
+            <div style="font-size: 12px; color: #666;">30%</div>
+          </div>
+          <div class="inventory-box">
+            <div class="days">60日以上</div>
+            <div class="count danger">1,459点</div>
+            <div style="font-size: 12px; color: #666;">17%</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-section" style="margin-bottom: 0;">
+        <h2>カテゴリ別在庫金額</h2>
+        <div style="padding: 10px 0;">
+          <div class="bar-horizontal">
+            <div class="label">テレビ</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 78%;"><span>7,800万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">エアコン</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 72%;"><span>7,200万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">冷蔵庫</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 65%;"><span>6,500万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">洗濯機</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 58%;"><span>5,800万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">小型家電</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 47%;"><span>4,700万円</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>不動在庫リスト（60日以上滞留）</h2>
+      <div class="table-container">
+        <table class="data-table" aria-label="不動在庫リスト">
+          <thead>
+            <tr>
+              <th scope="col">商品名</th>
+              <th scope="col">カテゴリ</th>
+              <th scope="col">在庫数</th>
+              <th scope="col">在庫金額</th>
+              <th scope="col">滞留日数</th>
+              <th scope="col">ステータス</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>4K液晶テレビ 55型 旧モデル</td>
+              <td>テレビ</td>
+              <td class="number">45台</td>
+              <td class="number">2,250万円</td>
+              <td class="number">95日</td>
+              <td><span class="status danger">要対応</span></td>
+            </tr>
+            <tr>
+              <td>ドラム式洗濯乾燥機 旧カラー</td>
+              <td>洗濯機</td>
+              <td class="number">28台</td>
+              <td class="number">840万円</td>
+              <td class="number">82日</td>
+              <td><span class="status danger">要対応</span></td>
+            </tr>
+            <tr>
+              <td>冷蔵庫 450L 旧モデル</td>
+              <td>冷蔵庫</td>
+              <td class="number">32台</td>
+              <td class="number">768万円</td>
+              <td class="number">75日</td>
+              <td><span class="status warning">注意</span></td>
+            </tr>
+            <tr>
+              <td>エアコン 14畳用 2024年モデル</td>
+              <td>エアコン</td>
+              <td class="number">56台</td>
+              <td class="number">672万円</td>
+              <td class="number">68日</td>
+              <td><span class="status warning">注意</span></td>
+            </tr>
+            <tr>
+              <td>空気清浄機 旧型</td>
+              <td>小型家電</td>
+              <td class="number">120台</td>
+              <td class="number">480万円</td>
+              <td class="number">62日</td>
+              <td><span class="status warning">注意</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. 店舗・チャネル別分析 -->
+    <h2 class="section-title">店舗・チャネル別分析</h2>
+    <div class="chart-section">
+      <h2>EC / 店舗 売上構成比</h2>
+      <div class="channel-comparison">
+        <div class="channel-box">
+          <div class="channel-name">実店舗</div>
+          <div class="channel-value">5.95億円</div>
+          <div class="channel-percent">70%</div>
+        </div>
+        <div class="channel-box">
+          <div class="channel-name">ECサイト</div>
+          <div class="channel-value">2.55億円</div>
+          <div class="channel-percent">30%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>店舗別実績</h2>
+      <div class="table-container">
+        <table class="data-table" aria-label="店舗別実績一覧">
+          <thead>
+            <tr>
+              <th scope="col">店舗名</th>
+              <th scope="col">売上高</th>
+              <th scope="col">前月比</th>
+              <th scope="col">粗利益</th>
+              <th scope="col">粗利率</th>
+              <th scope="col">在庫金額</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>新宿本店</td>
+              <td class="number">1.85億円</td>
+              <td class="number change positive">↑ 8.2%</td>
+              <td class="number">4,625万円</td>
+              <td class="number">25.0%</td>
+              <td class="number">6,500万円</td>
+            </tr>
+            <tr>
+              <td>渋谷店</td>
+              <td class="number">1.42億円</td>
+              <td class="number change positive">↑ 12.5%</td>
+              <td class="number">3,550万円</td>
+              <td class="number">25.0%</td>
+              <td class="number">5,200万円</td>
+            </tr>
+            <tr>
+              <td>池袋店</td>
+              <td class="number">1.18億円</td>
+              <td class="number change negative">↓ 3.4%</td>
+              <td class="number">2,832万円</td>
+              <td class="number">24.0%</td>
+              <td class="number">4,800万円</td>
+            </tr>
+            <tr>
+              <td>横浜店</td>
+              <td class="number">0.95億円</td>
+              <td class="number change positive">↑ 5.8%</td>
+              <td class="number">2,280万円</td>
+              <td class="number">24.0%</td>
+              <td class="number">4,200万円</td>
+            </tr>
+            <tr>
+              <td>大宮店</td>
+              <td class="number">0.55億円</td>
+              <td class="number change positive">↑ 15.2%</td>
+              <td class="number">1,375万円</td>
+              <td class="number">25.0%</td>
+              <td class="number">3,100万円</td>
+            </tr>
+            <tr>
+              <td class="emphasized">ECサイト</td>
+              <td class="number emphasized">2.55億円</td>
+              <td class="number change positive">↑ 22.4%</td>
+              <td class="number emphasized">6,120万円</td>
+              <td class="number">24.0%</td>
+              <td class="number">8,200万円</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 6. 販売効率・運営指標 -->
+    <h2 class="section-title">販売効率・運営指標</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>客単価</h3>
+        <div class="value">53,640<span class="unit">円</span></div>
+        <div class="change positive">↑ 6.8% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>来店客数（実店舗合計）</h3>
+        <div class="value">42,580<span class="unit">人</span></div>
+        <div class="change positive">↑ 3.2% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>CVR（EC）</h3>
+        <div class="value">2.8<span class="unit">%</span></div>
+        <div class="change positive">↑ 0.3pt 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>値引率</h3>
+        <div class="value">8.5<span class="unit">%</span></div>
+        <div class="change negative">↑ 1.2pt 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>返品率</h3>
+        <div class="value">1.2<span class="unit">%</span></div>
+        <div class="change positive">↓ 0.2pt 前月比</div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>店舗別運営指標</h2>
+      <div class="table-container">
+        <table class="data-table" aria-label="店舗別運営指標一覧">
+          <thead>
+            <tr>
+              <th scope="col">店舗名</th>
+              <th scope="col">来店客数</th>
+              <th scope="col">客単価</th>
+              <th scope="col">購買率</th>
+              <th scope="col">値引率</th>
+              <th scope="col">返品率</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>新宿本店</td>
+              <td class="number">12,450人</td>
+              <td class="number">58,200円</td>
+              <td class="number">25.5%</td>
+              <td class="number">7.8%</td>
+              <td class="number">1.0%</td>
+            </tr>
+            <tr>
+              <td>渋谷店</td>
+              <td class="number">9,820人</td>
+              <td class="number">55,400円</td>
+              <td class="number">26.1%</td>
+              <td class="number">8.2%</td>
+              <td class="number">1.1%</td>
+            </tr>
+            <tr>
+              <td>池袋店</td>
+              <td class="number">8,540人</td>
+              <td class="number">52,800円</td>
+              <td class="number">26.2%</td>
+              <td class="number">9.5%</td>
+              <td class="number">1.4%</td>
+            </tr>
+            <tr>
+              <td>横浜店</td>
+              <td class="number">7,230人</td>
+              <td class="number">50,200円</td>
+              <td class="number">26.2%</td>
+              <td class="number">8.8%</td>
+              <td class="number">1.2%</td>
+            </tr>
+            <tr>
+              <td>大宮店</td>
+              <td class="number">4,540人</td>
+              <td class="number">48,500円</td>
+              <td class="number">25.0%</td>
+              <td class="number">9.2%</td>
+              <td class="number">1.3%</td>
+            </tr>
+            <tr>
+              <td class="emphasized">ECサイト</td>
+              <td class="number">185,200 PV</td>
+              <td class="number">52,100円</td>
+              <td class="number">2.8% (CVR)</td>
+              <td class="number">7.5%</td>
+              <td class="number">1.5%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
