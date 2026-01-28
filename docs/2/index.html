@@ -47,6 +47,11 @@
       margin-left: 20px;
       opacity: 0.5;
       cursor: not-allowed;
+      background: none;
+      border: none;
+      font-size: inherit;
+      font-family: inherit;
+      padding: 0;
     }
     @media (max-width: 768px) {
       .header {
@@ -354,8 +359,8 @@
     <h1>中古自動車 販売・買取ダッシュボード</h1>
     <div class="date-info">2026年1月28日 更新</div>
     <nav>
-      <span class="nav-disabled" aria-label="レポート（準備中）">レポート</span>
-      <span class="nav-disabled" aria-label="設定（準備中）">設定</span>
+      <button type="button" class="nav-disabled" disabled>レポート</button>
+      <button type="button" class="nav-disabled" disabled>設定</button>
     </nav>
   </header>
 
@@ -407,9 +412,9 @@
 
     <!-- 2. 売上・利益推移 -->
     <div class="section">
-      <h2>売上・利益推移（月次）</h2>
+      <h2>売上推移（月次）</h2>
       <div class="chart-box">
-        <div class="line-chart" role="img" aria-label="月次売上・利益推移グラフ（4月〜1月）">
+        <div class="line-chart" role="img" aria-label="月次売上推移グラフ: 4月1.45億円、5月1.62億円、6月1.55億円、7月1.78億円、8月1.68億円、9月1.58億円、10月1.52億円、11月1.82億円、12月1.92億円、1月1.85億円">
           <div class="line-point sales" style="margin-bottom: 120px;" aria-hidden="true"></div>
           <div class="line-point sales" style="margin-bottom: 140px;" aria-hidden="true"></div>
           <div class="line-point sales" style="margin-bottom: 130px;" aria-hidden="true"></div>
@@ -480,7 +485,7 @@
         <div class="chart-box">
           <h4>在庫日数別分布</h4>
           <div class="pie-chart-container">
-            <div class="pie-chart" style="background: conic-gradient(#10b981 0deg 180deg, #f59e0b 180deg 270deg, #ef4444 270deg 360deg);" role="img" aria-label="在庫日数別円グラフ：30日未満50%、30〜60日25%、60日以上25%"></div>
+            <div class="pie-chart" style="background: conic-gradient(#10b981 0deg 180deg, #f59e0b 180deg 270deg, #ef4444 270deg 360deg);" role="img" aria-label="在庫日数別円グラフ: 30日未満: 50%、30〜60日: 25%、60日以上: 25%"></div>
             <div class="pie-legend">
               <div class="pie-legend-item">
                 <div class="pie-legend-color" style="background: #10b981;"></div>
@@ -610,7 +615,7 @@
         <div class="chart-box">
           <h4>車種別販売構成比（今月）</h4>
           <div class="pie-chart-container">
-            <div class="pie-chart" style="background: conic-gradient(#1e3a5f 0deg 72deg, #2d5a87 72deg 144deg, #4b7baa 144deg 252deg, #7ba3c7 252deg 317deg, #a8c5db 317deg 360deg);" role="img" aria-label="車種別販売構成比円グラフ"></div>
+            <div class="pie-chart" style="background: conic-gradient(#1e3a5f 0deg 72deg, #2d5a87 72deg 144deg, #4b7baa 144deg 252deg, #7ba3c7 252deg 317deg, #a8c5db 317deg 360deg);" role="img" aria-label="車種別販売構成比円グラフ: 軽自動車25台(20%)、コンパクト25台(20%)、SUV38台(30%)、ミニバン23台(18%)、セダン16台(12%)"></div>
             <div class="pie-legend">
               <div class="pie-legend-item">
                 <div class="pie-legend-color" style="background: #1e3a5f;"></div>
