@@ -1,1 +1,786 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>飲食店ダッシュボード</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .header nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      opacity: 0.9;
+    }
+    .header nav a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .header nav .nav-disabled {
+      color: white;
+      margin-left: 20px;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .header .period-info {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    @media (max-width: 600px) {
+      .header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #1e3a5f;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    .stat-card h3 {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+    }
+    .stat-card .unit {
+      font-size: 14px;
+      color: #666;
+      margin-left: 4px;
+    }
+    .stat-card .change {
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .stat-card .change.positive {
+      color: #10b981;
+    }
+    .stat-card .change.negative {
+      color: #ef4444;
+    }
+    .chart-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 30px;
+    }
+    .chart-section h2 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chart-placeholder {
+      height: 250px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      padding: 20px;
+      position: relative;
+    }
+    .line-chart {
+      height: 250px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 8px;
+      position: relative;
+      padding: 20px;
+    }
+    .line-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+    .bar {
+      width: 40px;
+      background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+    }
+    .bar-label {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #666;
+      white-space: nowrap;
+    }
+    .chart-legend {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+    .legend-inline {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+    .grid-2col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    @media (max-width: 900px) {
+      .grid-2col {
+        grid-template-columns: 1fr;
+      }
+    }
+    .pie-chart-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+    }
+    .pie-chart {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      position: relative;
+    }
+    .pie-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pie-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .pie-legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .data-table th,
+    .data-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .data-table th {
+      font-weight: 600;
+      color: #666;
+      font-size: 13px;
+      background: #f8fafc;
+    }
+    .data-table tr:hover {
+      background-color: #f9fafb;
+    }
+    .data-table td.number {
+      text-align: right;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+    .data-table .emphasized {
+      font-weight: 600;
+    }
+    .status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status.popular {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .status.normal {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .status.slow {
+      background: #fef3c7;
+      color: #78350f;
+    }
+    .status.new {
+      background: #f3e8ff;
+      color: #6b21a8;
+    }
+    .category {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .category.dinner {
+      background: #1e3a5f;
+      color: white;
+    }
+    .category.lunch {
+      background: #2d5a87;
+      color: white;
+    }
+    .category.takeout {
+      background: #4a7c9b;
+      color: white;
+    }
+    .category.drinks {
+      background: #7ba3bc;
+      color: white;
+    }
+    .bar-horizontal {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .bar-horizontal .label {
+      width: 80px;
+      font-size: 13px;
+      text-align: right;
+    }
+    .bar-horizontal .bar-bg {
+      flex: 1;
+      height: 24px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-horizontal .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1e3a5f 0%, #2d5a87 100%);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+    }
+    .bar-horizontal .bar-fill span {
+      font-size: 11px;
+      color: white;
+      font-weight: 600;
+    }
+    .time-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 200px;
+      padding: 20px 10px;
+    }
+    .time-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .time-bar .bar {
+      width: 32px;
+    }
+    .time-bar .time-label {
+      font-size: 11px;
+      color: #666;
+    }
+    .time-bar .count-label {
+      font-size: 10px;
+      color: #333;
+      font-weight: 600;
+    }
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .stat-card .value {
+        font-size: 22px;
+      }
+      .bar {
+        width: 24px;
+      }
+      .pie-chart-container {
+        flex-direction: column;
+      }
+      .time-bar .bar {
+        width: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>飲食店ダッシュボード</h1>
+    <span class="period-info">2026年1月度 （更新日: 2026/01/28）</span>
+    <nav>
+      <span class="nav-disabled" aria-label="レポート機能（準備中）">レポート</span>
+      <span class="nav-disabled" aria-label="設定機能（準備中）">設定</span>
+    </nav>
+  </header>
 
+  <main class="container">
+    <!-- 1. 全体KPI -->
+    <h2 class="section-title">全体KPI</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>今月の売上高</h3>
+        <div class="value">2,850<span class="unit">万円</span></div>
+        <div class="change positive">↑ 8.5% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>利益率</h3>
+        <div class="value">18.2<span class="unit">%</span></div>
+        <div class="change positive">↑ 1.2pt 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>来店客数</h3>
+        <div class="value">4,256<span class="unit">人</span></div>
+        <div class="change positive">↑ 12.3% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>客単価</h3>
+        <div class="value">6,695<span class="unit">円</span></div>
+        <div class="change negative">↓ 2.1% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>回転率</h3>
+        <div class="value">2.4<span class="unit">回/日</span></div>
+        <div class="change positive">↑ 0.2回 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>予約率</h3>
+        <div class="value">68.5<span class="unit">%</span></div>
+        <div class="change positive">↑ 5.2pt 前月比</div>
+      </div>
+    </div>
+
+    <!-- 2. 売上推移 -->
+    <div class="chart-section">
+      <h2>月次売上推移（過去12ヶ月）</h2>
+      <div class="line-chart">
+        <svg viewBox="0 0 800 200" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title-sales">
+          <title id="chart-title-sales">売上高と利益の月次推移グラフ（2025年2月〜2026年1月）</title>
+          <!-- Grid lines -->
+          <line x1="50" y1="20" x2="750" y2="20" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="60" x2="750" y2="60" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="100" x2="750" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="140" x2="750" y2="140" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="180" x2="750" y2="180" stroke="#e5e7eb" stroke-width="1"/>
+          <!-- Y-axis labels -->
+          <text x="40" y="24" font-size="10" fill="#666" text-anchor="end">3,500万</text>
+          <text x="40" y="64" font-size="10" fill="#666" text-anchor="end">2,625万</text>
+          <text x="40" y="104" font-size="10" fill="#666" text-anchor="end">1,750万</text>
+          <text x="40" y="144" font-size="10" fill="#666" text-anchor="end">875万</text>
+          <text x="40" y="184" font-size="10" fill="#666" text-anchor="end">0</text>
+          <!-- 売上高 (blue line) -->
+          <polyline fill="none" stroke="#1e3a5f" stroke-width="3"
+            points="100,120 158,115 216,100 274,95 332,85 390,90 448,95 506,80 564,75 622,70 680,65 738,55"/>
+          <!-- 利益 (green line) -->
+          <polyline fill="none" stroke="#10b981" stroke-width="3"
+            points="100,155 158,152 216,148 274,145 332,140 390,142 448,145 506,138 564,135 622,132 680,128 738,122"/>
+          <!-- Data points 売上高 -->
+          <circle cx="100" cy="120" r="4" fill="#1e3a5f"/>
+          <circle cx="158" cy="115" r="4" fill="#1e3a5f"/>
+          <circle cx="216" cy="100" r="4" fill="#1e3a5f"/>
+          <circle cx="274" cy="95" r="4" fill="#1e3a5f"/>
+          <circle cx="332" cy="85" r="4" fill="#1e3a5f"/>
+          <circle cx="390" cy="90" r="4" fill="#1e3a5f"/>
+          <circle cx="448" cy="95" r="4" fill="#1e3a5f"/>
+          <circle cx="506" cy="80" r="4" fill="#1e3a5f"/>
+          <circle cx="564" cy="75" r="4" fill="#1e3a5f"/>
+          <circle cx="622" cy="70" r="4" fill="#1e3a5f"/>
+          <circle cx="680" cy="65" r="4" fill="#1e3a5f"/>
+          <circle cx="738" cy="55" r="4" fill="#1e3a5f"/>
+          <!-- Data points 利益 -->
+          <circle cx="100" cy="155" r="4" fill="#10b981"/>
+          <circle cx="158" cy="152" r="4" fill="#10b981"/>
+          <circle cx="216" cy="148" r="4" fill="#10b981"/>
+          <circle cx="274" cy="145" r="4" fill="#10b981"/>
+          <circle cx="332" cy="140" r="4" fill="#10b981"/>
+          <circle cx="390" cy="142" r="4" fill="#10b981"/>
+          <circle cx="448" cy="145" r="4" fill="#10b981"/>
+          <circle cx="506" cy="138" r="4" fill="#10b981"/>
+          <circle cx="564" cy="135" r="4" fill="#10b981"/>
+          <circle cx="622" cy="132" r="4" fill="#10b981"/>
+          <circle cx="680" cy="128" r="4" fill="#10b981"/>
+          <circle cx="738" cy="122" r="4" fill="#10b981"/>
+          <!-- X-axis labels -->
+          <text x="100" y="198" font-size="10" fill="#666" text-anchor="middle">2月</text>
+          <text x="158" y="198" font-size="10" fill="#666" text-anchor="middle">3月</text>
+          <text x="216" y="198" font-size="10" fill="#666" text-anchor="middle">4月</text>
+          <text x="274" y="198" font-size="10" fill="#666" text-anchor="middle">5月</text>
+          <text x="332" y="198" font-size="10" fill="#666" text-anchor="middle">6月</text>
+          <text x="390" y="198" font-size="10" fill="#666" text-anchor="middle">7月</text>
+          <text x="448" y="198" font-size="10" fill="#666" text-anchor="middle">8月</text>
+          <text x="506" y="198" font-size="10" fill="#666" text-anchor="middle">9月</text>
+          <text x="564" y="198" font-size="10" fill="#666" text-anchor="middle">10月</text>
+          <text x="622" y="198" font-size="10" fill="#666" text-anchor="middle">11月</text>
+          <text x="680" y="198" font-size="10" fill="#666" text-anchor="middle">12月</text>
+          <text x="738" y="198" font-size="10" fill="#666" text-anchor="middle">1月</text>
+        </svg>
+      </div>
+      <div class="legend-inline">
+        <div class="legend-item">
+          <div class="legend-color" style="background: #1e3a5f;"></div>
+          <span>売上高</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #10b981;"></div>
+          <span>利益</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. カテゴリ別・時間帯別分析 -->
+    <h2 class="section-title">売上分析</h2>
+    <div class="grid-2col">
+      <div class="chart-section" style="margin-bottom: 0;">
+        <h2>カテゴリ別売上</h2>
+        <div class="pie-chart-container">
+          <svg width="180" height="180" viewBox="0 0 180 180" class="pie-chart" role="img" aria-labelledby="chart-title-category">
+            <title id="chart-title-category">カテゴリ別売上の円グラフ：ディナー45%、ランチ30%、テイクアウト15%、ドリンク10%</title>
+            <!-- Pie segments: total circumference = 2 * pi * 70 = 440 -->
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#1e3a5f" stroke-width="40" stroke-dasharray="198 242" stroke-dashoffset="0"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#2d5a87" stroke-width="40" stroke-dasharray="132 308" stroke-dashoffset="-198"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#4a7c9b" stroke-width="40" stroke-dasharray="66 374" stroke-dashoffset="-330"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#7ba3bc" stroke-width="40" stroke-dasharray="44 396" stroke-dashoffset="-396"/>
+          </svg>
+          <div class="pie-legend">
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #1e3a5f;"></div>
+              <span>ディナー 45%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #2d5a87;"></div>
+              <span>ランチ 30%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #4a7c9b;"></div>
+              <span>テイクアウト 15%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #7ba3bc;"></div>
+              <span>ドリンク 10%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-section" style="margin-bottom: 0;">
+        <h2>曜日別売上</h2>
+        <div style="padding: 10px 0;">
+          <div class="bar-horizontal">
+            <div class="label">月曜日</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 55%;"><span>320万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">火曜日</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 52%;"><span>305万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">水曜日</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 58%;"><span>340万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">木曜日</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 62%;"><span>365万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">金曜日</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 85%;"><span>495万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">土曜日</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 100%;"><span>580万円</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">日曜日</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 76%;"><span>445万円</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>時間帯別来店数</h2>
+      <div class="chart-placeholder" role="img" aria-label="時間帯別来店数を示す棒グラフ：ランチタイム（11時〜14時）とディナータイム（18時〜21時）にピーク">
+        <div class="time-chart" style="width: 100%; height: 100%;">
+          <div class="time-bar">
+            <div class="count-label">85</div>
+            <div class="bar" style="height: 25%;"></div>
+            <div class="time-label">11時</div>
+          </div>
+          <div class="time-bar">
+            <div class="count-label">245</div>
+            <div class="bar" style="height: 72%;"></div>
+            <div class="time-label">12時</div>
+          </div>
+          <div class="time-bar">
+            <div class="count-label">180</div>
+            <div class="bar" style="height: 53%;"></div>
+            <div class="time-label">13時</div>
+          </div>
+          <div class="time-bar">
+            <div class="count-label">45</div>
+            <div class="bar" style="height: 13%;"></div>
+            <div class="time-label">14時</div>
+          </div>
+          <div class="time-bar">
+            <div class="count-label">120</div>
+            <div class="bar" style="height: 35%;"></div>
+            <div class="time-label">18時</div>
+          </div>
+          <div class="time-bar">
+            <div class="count-label">340</div>
+            <div class="bar" style="height: 100%;"></div>
+            <div class="time-label">19時</div>
+          </div>
+          <div class="time-bar">
+            <div class="count-label">285</div>
+            <div class="bar" style="height: 84%;"></div>
+            <div class="time-label">20時</div>
+          </div>
+          <div class="time-bar">
+            <div class="count-label">156</div>
+            <div class="bar" style="height: 46%;"></div>
+            <div class="time-label">21時</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. メニュー別売上 -->
+    <h2 class="section-title">メニュー分析</h2>
+    <div class="chart-section">
+      <h2>メニュー別売上ランキング</h2>
+      <div class="table-container">
+        <table class="data-table" aria-label="メニュー別売上ランキング">
+          <thead>
+            <tr>
+              <th scope="col">順位</th>
+              <th scope="col">メニュー名</th>
+              <th scope="col">カテゴリ</th>
+              <th scope="col">注文数</th>
+              <th scope="col">売上</th>
+              <th scope="col">利益率</th>
+              <th scope="col">人気度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="number">1</td>
+              <td class="emphasized">特選和牛ステーキ</td>
+              <td><span class="category dinner">ディナー</span></td>
+              <td class="number">245件</td>
+              <td class="number">490万円</td>
+              <td class="number">22.0%</td>
+              <td><span class="status popular">人気</span></td>
+            </tr>
+            <tr>
+              <td class="number">2</td>
+              <td class="emphasized">季節の刺身盛り合わせ</td>
+              <td><span class="category dinner">ディナー</span></td>
+              <td class="number">312件</td>
+              <td class="number">374万円</td>
+              <td class="number">35.0%</td>
+              <td><span class="status popular">人気</span></td>
+            </tr>
+            <tr>
+              <td class="number">3</td>
+              <td>ランチ御膳</td>
+              <td><span class="category lunch">ランチ</span></td>
+              <td class="number">856件</td>
+              <td class="number">342万円</td>
+              <td class="number">28.0%</td>
+              <td><span class="status popular">人気</span></td>
+            </tr>
+            <tr>
+              <td class="number">4</td>
+              <td>本日のおすすめコース</td>
+              <td><span class="category dinner">ディナー</span></td>
+              <td class="number">198件</td>
+              <td class="number">316万円</td>
+              <td class="number">25.0%</td>
+              <td><span class="status normal">通常</span></td>
+            </tr>
+            <tr>
+              <td class="number">5</td>
+              <td>海鮮丼</td>
+              <td><span class="category lunch">ランチ</span></td>
+              <td class="number">524件</td>
+              <td class="number">262万円</td>
+              <td class="number">32.0%</td>
+              <td><span class="status normal">通常</span></td>
+            </tr>
+            <tr>
+              <td class="number">6</td>
+              <td>テイクアウト弁当</td>
+              <td><span class="category takeout">テイクアウト</span></td>
+              <td class="number">680件</td>
+              <td class="number">204万円</td>
+              <td class="number">18.0%</td>
+              <td><span class="status normal">通常</span></td>
+            </tr>
+            <tr>
+              <td class="number">7</td>
+              <td>季節のパスタ</td>
+              <td><span class="category lunch">ランチ</span></td>
+              <td class="number">425件</td>
+              <td class="number">170万円</td>
+              <td class="number">30.0%</td>
+              <td><span class="status new">新メニュー</span></td>
+            </tr>
+            <tr>
+              <td class="number">8</td>
+              <td>焼き魚定食</td>
+              <td><span class="category lunch">ランチ</span></td>
+              <td class="number">312件</td>
+              <td class="number">125万円</td>
+              <td class="number">35.0%</td>
+              <td><span class="status slow">低迷</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. スタッフ実績 -->
+    <h2 class="section-title">スタッフ実績</h2>
+    <div class="chart-section">
+      <h2>スタッフ別パフォーマンス</h2>
+      <div class="table-container">
+        <table class="data-table" aria-label="スタッフ別パフォーマンス一覧">
+          <thead>
+            <tr>
+              <th scope="col">スタッフ名</th>
+              <th scope="col">ポジション</th>
+              <th scope="col">接客評価</th>
+              <th scope="col">担当売上</th>
+              <th scope="col">勤務時間</th>
+              <th scope="col">時間売上</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="emphasized">山田太郎</td>
+              <td>ホールリーダー</td>
+              <td class="number">4.8/5.0</td>
+              <td class="number">380万円</td>
+              <td class="number">168時間</td>
+              <td class="number">22,619円/h</td>
+            </tr>
+            <tr>
+              <td>鈴木花子</td>
+              <td>ホール</td>
+              <td class="number">4.6/5.0</td>
+              <td class="number">295万円</td>
+              <td class="number">152時間</td>
+              <td class="number">19,408円/h</td>
+            </tr>
+            <tr>
+              <td>佐藤健一</td>
+              <td>ホール</td>
+              <td class="number">4.5/5.0</td>
+              <td class="number">268万円</td>
+              <td class="number">160時間</td>
+              <td class="number">16,750円/h</td>
+            </tr>
+            <tr>
+              <td>田中美咲</td>
+              <td>ホール</td>
+              <td class="number">4.7/5.0</td>
+              <td class="number">245万円</td>
+              <td class="number">144時間</td>
+              <td class="number">17,014円/h</td>
+            </tr>
+            <tr>
+              <td>高橋誠</td>
+              <td>キッチン</td>
+              <td class="number">-</td>
+              <td class="number">-</td>
+              <td class="number">176時間</td>
+              <td class="number">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

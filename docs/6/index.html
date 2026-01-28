@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>クリニック経営ダッシュボード</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .header nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      opacity: 0.9;
+    }
+    .header nav a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .header nav .nav-disabled {
+      color: white;
+      margin-left: 20px;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .header .period-info {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    @media (max-width: 600px) {
+      .header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #1e3a5f;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    .stat-card h3 {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+    }
+    .stat-card .unit {
+      font-size: 14px;
+      color: #666;
+      margin-left: 4px;
+    }
+    .stat-card .change {
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .stat-card .change.positive {
+      color: #10b981;
+    }
+    .stat-card .change.negative {
+      color: #ef4444;
+    }
+    .chart-section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 30px;
+    }
+    .chart-section h2 {
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chart-placeholder {
+      height: 250px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      padding: 20px;
+      position: relative;
+    }
+    .line-chart {
+      height: 250px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 8px;
+      position: relative;
+      padding: 20px;
+    }
+    .line-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+    .bar {
+      width: 40px;
+      background: linear-gradient(180deg, #1e3a5f 0%, #2d5a87 100%);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+    }
+    .legend-inline {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+    .grid-2col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    @media (max-width: 900px) {
+      .grid-2col {
+        grid-template-columns: 1fr;
+      }
+    }
+    .pie-chart-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+    }
+    .pie-chart {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      position: relative;
+    }
+    .pie-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pie-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .pie-legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .data-table th,
+    .data-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .data-table th {
+      font-weight: 600;
+      color: #666;
+      font-size: 13px;
+      background: #f8fafc;
+    }
+    .data-table tr:hover {
+      background-color: #f9fafb;
+    }
+    .data-table td.number {
+      text-align: right;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+    .data-table .emphasized {
+      font-weight: 600;
+    }
+    .status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status.completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .status.in-progress {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .status.waiting {
+      background: #fef3c7;
+      color: #78350f;
+    }
+    .status.no-show {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .status.cancelled {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+    .dept {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .dept.internal {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    .dept.dermatology {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+    .dept.pediatrics {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .dept.orthopedics {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+    .bar-horizontal {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .bar-horizontal .label {
+      width: 80px;
+      font-size: 13px;
+      text-align: right;
+    }
+    .bar-horizontal .bar-bg {
+      flex: 1;
+      height: 24px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-horizontal .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1e3a5f 0%, #2d5a87 100%);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+    }
+    .bar-horizontal .bar-fill span {
+      font-size: 11px;
+      color: white;
+      font-weight: 600;
+    }
+    .day-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      height: 200px;
+      padding: 20px 10px;
+    }
+    .day-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .day-bar .bar {
+      width: 40px;
+    }
+    .day-bar .day-label {
+      font-size: 12px;
+      color: #666;
+    }
+    .day-bar .count-label {
+      font-size: 10px;
+      color: #333;
+      font-weight: 600;
+    }
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .mini-stat {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .mini-stat .label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .mini-stat .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+    }
+    .rating {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .stat-card .value {
+        font-size: 22px;
+      }
+      .bar {
+        width: 24px;
+      }
+      .pie-chart-container {
+        flex-direction: column;
+      }
+      .day-bar .bar {
+        width: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>クリニック経営ダッシュボード</h1>
+    <span class="period-info">2026年1月度 （更新日: 2026/01/28）</span>
+    <nav>
+      <span class="nav-disabled" aria-label="レポート機能（準備中）">レポート</span>
+      <span class="nav-disabled" aria-label="設定機能（準備中）">設定</span>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- 1. 全体KPI -->
+    <h2 class="section-title">全体KPI</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>今月の診療収入</h3>
+        <div class="value">4,250<span class="unit">万円</span></div>
+        <div class="change positive">↑ 6.2% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>患者数（延べ）</h3>
+        <div class="value">2,856<span class="unit">人</span></div>
+        <div class="change positive">↑ 8.5% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>新規患者数</h3>
+        <div class="value">342<span class="unit">人</span></div>
+        <div class="change positive">↑ 15.2% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>平均診療単価</h3>
+        <div class="value">14,885<span class="unit">円</span></div>
+        <div class="change negative">↓ 2.1% 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>予約率</h3>
+        <div class="value">82.5<span class="unit">%</span></div>
+        <div class="change positive">↑ 3.2pt 前月比</div>
+      </div>
+      <div class="stat-card">
+        <h3>平均待ち時間</h3>
+        <div class="value">18<span class="unit">分</span></div>
+        <div class="change positive">↓ 3分 前月比</div>
+      </div>
+    </div>
+
+    <!-- 2. 収入推移 -->
+    <div class="chart-section">
+      <h2>月次診療収入推移（過去12ヶ月）</h2>
+      <div class="line-chart">
+        <svg viewBox="0 0 800 200" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title-revenue">
+          <title id="chart-title-revenue">保険診療と自由診療の月次収入推移グラフ（2025年2月〜2026年1月）</title>
+          <!-- Grid lines -->
+          <line x1="50" y1="20" x2="750" y2="20" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="60" x2="750" y2="60" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="100" x2="750" y2="100" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="140" x2="750" y2="140" stroke="#e5e7eb" stroke-width="1"/>
+          <line x1="50" y1="180" x2="750" y2="180" stroke="#e5e7eb" stroke-width="1"/>
+          <!-- Y-axis labels -->
+          <text x="40" y="24" font-size="10" fill="#666" text-anchor="end">5,000万</text>
+          <text x="40" y="64" font-size="10" fill="#666" text-anchor="end">3,750万</text>
+          <text x="40" y="104" font-size="10" fill="#666" text-anchor="end">2,500万</text>
+          <text x="40" y="144" font-size="10" fill="#666" text-anchor="end">1,250万</text>
+          <text x="40" y="184" font-size="10" fill="#666" text-anchor="end">0</text>
+          <!-- 保険診療 (blue line) -->
+          <polyline fill="none" stroke="#1e3a5f" stroke-width="3"
+            points="100,95 158,100 216,92 274,88 332,85 390,90 448,88 506,82 564,78 622,75 680,72 738,68"/>
+          <!-- 自由診療 (green line) -->
+          <polyline fill="none" stroke="#10b981" stroke-width="3"
+            points="100,160 158,162 216,158 274,155 332,152 390,155 448,152 506,148 564,145 622,142 680,140 738,138"/>
+          <!-- Data points 保険診療 -->
+          <circle cx="100" cy="95" r="4" fill="#1e3a5f"/>
+          <circle cx="158" cy="100" r="4" fill="#1e3a5f"/>
+          <circle cx="216" cy="92" r="4" fill="#1e3a5f"/>
+          <circle cx="274" cy="88" r="4" fill="#1e3a5f"/>
+          <circle cx="332" cy="85" r="4" fill="#1e3a5f"/>
+          <circle cx="390" cy="90" r="4" fill="#1e3a5f"/>
+          <circle cx="448" cy="88" r="4" fill="#1e3a5f"/>
+          <circle cx="506" cy="82" r="4" fill="#1e3a5f"/>
+          <circle cx="564" cy="78" r="4" fill="#1e3a5f"/>
+          <circle cx="622" cy="75" r="4" fill="#1e3a5f"/>
+          <circle cx="680" cy="72" r="4" fill="#1e3a5f"/>
+          <circle cx="738" cy="68" r="4" fill="#1e3a5f"/>
+          <!-- Data points 自由診療 -->
+          <circle cx="100" cy="160" r="4" fill="#10b981"/>
+          <circle cx="158" cy="162" r="4" fill="#10b981"/>
+          <circle cx="216" cy="158" r="4" fill="#10b981"/>
+          <circle cx="274" cy="155" r="4" fill="#10b981"/>
+          <circle cx="332" cy="152" r="4" fill="#10b981"/>
+          <circle cx="390" cy="155" r="4" fill="#10b981"/>
+          <circle cx="448" cy="152" r="4" fill="#10b981"/>
+          <circle cx="506" cy="148" r="4" fill="#10b981"/>
+          <circle cx="564" cy="145" r="4" fill="#10b981"/>
+          <circle cx="622" cy="142" r="4" fill="#10b981"/>
+          <circle cx="680" cy="140" r="4" fill="#10b981"/>
+          <circle cx="738" cy="138" r="4" fill="#10b981"/>
+          <!-- X-axis labels -->
+          <text x="100" y="198" font-size="10" fill="#666" text-anchor="middle">2月</text>
+          <text x="158" y="198" font-size="10" fill="#666" text-anchor="middle">3月</text>
+          <text x="216" y="198" font-size="10" fill="#666" text-anchor="middle">4月</text>
+          <text x="274" y="198" font-size="10" fill="#666" text-anchor="middle">5月</text>
+          <text x="332" y="198" font-size="10" fill="#666" text-anchor="middle">6月</text>
+          <text x="390" y="198" font-size="10" fill="#666" text-anchor="middle">7月</text>
+          <text x="448" y="198" font-size="10" fill="#666" text-anchor="middle">8月</text>
+          <text x="506" y="198" font-size="10" fill="#666" text-anchor="middle">9月</text>
+          <text x="564" y="198" font-size="10" fill="#666" text-anchor="middle">10月</text>
+          <text x="622" y="198" font-size="10" fill="#666" text-anchor="middle">11月</text>
+          <text x="680" y="198" font-size="10" fill="#666" text-anchor="middle">12月</text>
+          <text x="738" y="198" font-size="10" fill="#666" text-anchor="middle">1月</text>
+        </svg>
+      </div>
+      <div class="legend-inline">
+        <div class="legend-item">
+          <div class="legend-color" style="background: #1e3a5f;"></div>
+          <span>保険診療</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #10b981;"></div>
+          <span>自由診療</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 診療科目別分析 -->
+    <h2 class="section-title">診療科目別分析</h2>
+    <div class="grid-2col">
+      <div class="chart-section" style="margin-bottom: 0;">
+        <h2>診療科目別収入</h2>
+        <div class="pie-chart-container">
+          <svg width="180" height="180" viewBox="0 0 180 180" class="pie-chart" role="img" aria-labelledby="chart-title-dept">
+            <title id="chart-title-dept">診療科目別収入の円グラフ：内科35%、皮膚科25%、小児科20%、整形外科15%、その他5%</title>
+            <!-- Pie segments: total circumference = 2 * pi * 70 = 440 -->
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#1e3a5f" stroke-width="40" stroke-dasharray="154 286" stroke-dashoffset="0"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#2d5a87" stroke-width="40" stroke-dasharray="110 330" stroke-dashoffset="-154"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#4a7c9b" stroke-width="40" stroke-dasharray="88 352" stroke-dashoffset="-264"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#7ba3bc" stroke-width="40" stroke-dasharray="66 374" stroke-dashoffset="-352"/>
+            <circle cx="90" cy="90" r="70" fill="transparent" stroke="#a8c5d8" stroke-width="40" stroke-dasharray="22 418" stroke-dashoffset="-418"/>
+          </svg>
+          <div class="pie-legend">
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #1e3a5f;"></div>
+              <span>内科 35%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #2d5a87;"></div>
+              <span>皮膚科 25%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #4a7c9b;"></div>
+              <span>小児科 20%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #7ba3bc;"></div>
+              <span>整形外科 15%</span>
+            </div>
+            <div class="pie-legend-item">
+              <div class="pie-legend-color" style="background: #a8c5d8;"></div>
+              <span>その他 5%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-section" style="margin-bottom: 0;">
+        <h2>時間帯別予約状況</h2>
+        <div style="padding: 10px 0;">
+          <div class="bar-horizontal">
+            <div class="label">9:00</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 95%;"><span>95%</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">10:00</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 100%;"><span>100%</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">11:00</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 88%;"><span>88%</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">14:00</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 82%;"><span>82%</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">15:00</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 78%;"><span>78%</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">16:00</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 65%;"><span>65%</span></div>
+            </div>
+          </div>
+          <div class="bar-horizontal">
+            <div class="label">17:00</div>
+            <div class="bar-bg">
+              <div class="bar-fill" style="width: 72%;"><span>72%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h2>曜日別患者数</h2>
+      <div class="chart-placeholder" role="img" aria-label="曜日別患者数を示す棒グラフ：月曜日から土曜日まで">
+        <div class="day-chart" style="width: 100%; height: 100%;">
+          <div class="day-bar">
+            <div class="count-label">485</div>
+            <div class="bar" style="height: 85%;"></div>
+            <div class="day-label">月</div>
+          </div>
+          <div class="day-bar">
+            <div class="count-label">425</div>
+            <div class="bar" style="height: 74%;"></div>
+            <div class="day-label">火</div>
+          </div>
+          <div class="day-bar">
+            <div class="count-label">456</div>
+            <div class="bar" style="height: 80%;"></div>
+            <div class="day-label">水</div>
+          </div>
+          <div class="day-bar">
+            <div class="count-label">512</div>
+            <div class="bar" style="height: 90%;"></div>
+            <div class="day-label">木</div>
+          </div>
+          <div class="day-bar">
+            <div class="count-label">478</div>
+            <div class="bar" style="height: 84%;"></div>
+            <div class="day-label">金</div>
+          </div>
+          <div class="day-bar">
+            <div class="count-label">570</div>
+            <div class="bar" style="height: 100%;"></div>
+            <div class="day-label">土</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 診療科目別実績 -->
+    <div class="chart-section">
+      <h2>診療科目別実績</h2>
+      <div class="table-container">
+        <table class="data-table" aria-label="診療科目別実績">
+          <thead>
+            <tr>
+              <th scope="col">診療科目</th>
+              <th scope="col">患者数</th>
+              <th scope="col">診療収入</th>
+              <th scope="col">平均単価</th>
+              <th scope="col">保険診療率</th>
+              <th scope="col">前月比</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="emphasized">内科</td>
+              <td class="number">1,142人</td>
+              <td class="number">1,487万円</td>
+              <td class="number">13,022円</td>
+              <td class="number">92.5%</td>
+              <td class="number change positive">↑ 5.8%</td>
+            </tr>
+            <tr>
+              <td>皮膚科</td>
+              <td class="number">685人</td>
+              <td class="number">1,062万円</td>
+              <td class="number">15,504円</td>
+              <td class="number">75.2%</td>
+              <td class="number change positive">↑ 8.2%</td>
+            </tr>
+            <tr>
+              <td>小児科</td>
+              <td class="number">542人</td>
+              <td class="number">850万円</td>
+              <td class="number">15,683円</td>
+              <td class="number">95.8%</td>
+              <td class="number change positive">↑ 12.5%</td>
+            </tr>
+            <tr>
+              <td>整形外科</td>
+              <td class="number">328人</td>
+              <td class="number">638万円</td>
+              <td class="number">19,451円</td>
+              <td class="number">88.5%</td>
+              <td class="number change negative">↓ 2.3%</td>
+            </tr>
+            <tr>
+              <td>その他</td>
+              <td class="number">159人</td>
+              <td class="number">213万円</td>
+              <td class="number">13,396円</td>
+              <td class="number">82.4%</td>
+              <td class="number change positive">↑ 3.5%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 5. 医師別実績 -->
+    <h2 class="section-title">医師別実績</h2>
+    <div class="chart-section">
+      <h2>医師別パフォーマンス</h2>
+      <div class="table-container">
+        <table class="data-table" aria-label="医師別パフォーマンス">
+          <thead>
+            <tr>
+              <th scope="col">医師名</th>
+              <th scope="col">担当科目</th>
+              <th scope="col">診察患者数</th>
+              <th scope="col">診療収入</th>
+              <th scope="col">平均待ち時間</th>
+              <th scope="col">満足度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="emphasized">佐藤一郎</td>
+              <td><span class="dept internal">内科</span></td>
+              <td class="number">425人</td>
+              <td class="number">552万円</td>
+              <td class="number">15分</td>
+              <td class="number rating">4.8/5.0</td>
+            </tr>
+            <tr>
+              <td class="emphasized">田中花子</td>
+              <td><span class="dept dermatology">皮膚科</span></td>
+              <td class="number">312人</td>
+              <td class="number">484万円</td>
+              <td class="number">12分</td>
+              <td class="number rating">4.9/5.0</td>
+            </tr>
+            <tr>
+              <td>山本健一</td>
+              <td><span class="dept internal">内科</span></td>
+              <td class="number">385人</td>
+              <td class="number">500万円</td>
+              <td class="number">18分</td>
+              <td class="number rating">4.6/5.0</td>
+            </tr>
+            <tr>
+              <td>鈴木美咲</td>
+              <td><span class="dept pediatrics">小児科</span></td>
+              <td class="number">298人</td>
+              <td class="number">468万円</td>
+              <td class="number">14分</td>
+              <td class="number rating">4.9/5.0</td>
+            </tr>
+            <tr>
+              <td>高橋誠</td>
+              <td><span class="dept orthopedics">整形外科</span></td>
+              <td class="number">245人</td>
+              <td class="number">476万円</td>
+              <td class="number">20分</td>
+              <td class="number rating">4.5/5.0</td>
+            </tr>
+            <tr>
+              <td>中村由美</td>
+              <td><span class="dept dermatology">皮膚科</span></td>
+              <td class="number">285人</td>
+              <td class="number">442万円</td>
+              <td class="number">10分</td>
+              <td class="number rating">4.8/5.0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 6. 診療区分別指標 -->
+    <h2 class="section-title">診療区分別指標</h2>
+    <div class="chart-section">
+      <h2>月次比較</h2>
+      <div class="mini-stats">
+        <div class="mini-stat">
+          <div class="label">保険診療</div>
+          <div class="value">3,570万円</div>
+        </div>
+        <div class="mini-stat">
+          <div class="label">自由診療</div>
+          <div class="value">680万円</div>
+        </div>
+        <div class="mini-stat">
+          <div class="label">レセプト枚数</div>
+          <div class="value">2,421枚</div>
+        </div>
+        <div class="mini-stat">
+          <div class="label">平均点数</div>
+          <div class="value">1,474点</div>
+        </div>
+        <div class="mini-stat">
+          <div class="label">再診率</div>
+          <div class="value">68.2%</div>
+        </div>
+        <div class="mini-stat">
+          <div class="label">キャンセル率</div>
+          <div class="value">4.8%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. 本日の予約状況 -->
+    <div class="chart-section">
+      <h2>本日の予約状況（サンプル）</h2>
+      <div class="table-container">
+        <table class="data-table" aria-label="本日の予約状況">
+          <thead>
+            <tr>
+              <th scope="col">時間</th>
+              <th scope="col">患者ID</th>
+              <th scope="col">診療科目</th>
+              <th scope="col">診療区分</th>
+              <th scope="col">担当医</th>
+              <th scope="col">ステータス</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>09:00</td>
+              <td>P-2024-0542</td>
+              <td><span class="dept internal">内科</span></td>
+              <td>再診</td>
+              <td>佐藤一郎</td>
+              <td><span class="status completed">診察完了</span></td>
+            </tr>
+            <tr>
+              <td>09:15</td>
+              <td>P-2024-0856</td>
+              <td><span class="dept dermatology">皮膚科</span></td>
+              <td>初診</td>
+              <td>田中花子</td>
+              <td><span class="status completed">診察完了</span></td>
+            </tr>
+            <tr>
+              <td>09:30</td>
+              <td>P-2024-1024</td>
+              <td><span class="dept pediatrics">小児科</span></td>
+              <td>再診</td>
+              <td>鈴木美咲</td>
+              <td><span class="status in-progress">診察中</span></td>
+            </tr>
+            <tr>
+              <td>09:45</td>
+              <td>P-2024-0328</td>
+              <td><span class="dept internal">内科</span></td>
+              <td>再診</td>
+              <td>山本健一</td>
+              <td><span class="status waiting">待機中</span></td>
+            </tr>
+            <tr>
+              <td>10:00</td>
+              <td>P-2024-1156</td>
+              <td><span class="dept orthopedics">整形外科</span></td>
+              <td>初診</td>
+              <td>高橋誠</td>
+              <td><span class="status waiting">待機中</span></td>
+            </tr>
+            <tr>
+              <td>10:15</td>
+              <td>P-2024-0672</td>
+              <td><span class="dept dermatology">皮膚科</span></td>
+              <td>再診</td>
+              <td>中村由美</td>
+              <td><span class="status no-show">未来院</span></td>
+            </tr>
+            <tr>
+              <td>10:30</td>
+              <td>P-2024-0945</td>
+              <td><span class="dept internal">内科</span></td>
+              <td>再診</td>
+              <td>佐藤一郎</td>
+              <td><span class="status cancelled">キャンセル</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

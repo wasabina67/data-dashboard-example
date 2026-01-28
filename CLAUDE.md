@@ -27,7 +27,9 @@ node server.js     # Start dev server on http://localhost:3000
 - `docs/1/index.html` - Real estate dashboard (山田不動産)
 - `docs/2/index.html` - Used car sales dashboard (中古自動車)
 - `docs/3/index.html` - Home electronics retail dashboard (家電販売)
-- `docs/4/`, `docs/5/`, `docs/6/` - Empty placeholders
+- `docs/4/index.html` - Restaurant dashboard (飲食店)
+- `docs/5/index.html` - E-commerce dashboard (ECサイト)
+- `docs/6/index.html` - Medical clinic dashboard (クリニック経営)
 
 ## Key Patterns
 
